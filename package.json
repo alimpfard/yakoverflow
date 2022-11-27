@@ -1,0 +1,22 @@
+{
+  "name": "yakoverflow",
+  "version": "1.0.0",
+  "description": "Pick random FIXMEs from serenity, but with style",
+  "main": "out.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "keywords": [
+    "serenity",
+    "yak",
+    "yakoverflow",
+    "fixme",
+    "roulette"
+  ],
+  "author": "Ali Mohammad Pur",
+  "license": "BSD-2-Clause",
+  "dependencies": {
+    "express": "^4.18.2",
+    "mongodb": "^4.12.1"
+  }
+}
