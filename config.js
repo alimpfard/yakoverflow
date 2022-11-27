@@ -1,6 +1,11 @@
+const process = require('process');
+
+var mongo_addr = process.env.MONGO_ADDR || 'mongodb://localhost';
+var port = process.env.PORT || 8080;
+
 module.exports = {
-	port: 8080,
-	mongo_addr: "mongodb://127.0.0.1",
+	port,
+	mongo_addr,
 	database: "fancy_db_name",
 	serenityRepositoryPath: "serenity",
 	serenityRepositoryRemote: "https://github.com/serenityos/serenity",
