@@ -9,6 +9,8 @@ const MongoClient = require("mongodb").MongoClient;
 const process_rollStatistics = require("./endpoints/rollStatistics.js");
 const process_index = require("./endpoints/index.js");
 const action_index_0 = require("./actions/index-action0.js");
+const process_rollsByMe = require("./endpoints/rollsByMe.js");
+const action_rollsByMe_0 = require("./actions/rollsByMe-action0.js");
 const process_roll = require("./endpoints/roll.js");
 const action_roll_0 = require("./actions/roll-action0.js");
 const action_roll_1 = require("./actions/roll-action1.js");
@@ -102,6 +104,51 @@ app.get("/index", async (req, res) => {
 		} finally {
 			if (!ok && !handled) res.status(500).send(res_output);
 			}
+	});
+app.post("/rollsByMe", async (req, res) => {
+	var bodyStr = "";
+	req.on("data", function(chunk) { 
+		bodyStr += chunk.toString();
+	});
+	req.on("end", async function() {
+		bodyStr = bodyStr
+		let ok = false, handled = false, res_input = null, res_output = null;
+		let jsondec = JSON.parse(bodyStr);
+			dbsession.startTransaction();
+		let total_failure = {fail_early: false, action_handled_response: false};
+		try {
+			res_input = {
+			};
+
+			res_output = {
+				'rolls': null /* ArrayType(RedactedFixMe) */,
+			};
+
+			if (await action_rollsByMe_0(res, req, res_output, res_input, total_failure) &&
+			    true) {
+				(total_failure.action_handled_response ? (x=>{console.log(x)}) : x=>{res.send(x)})(await process_rollsByMe(res_input, res_output));
+				ok = true;
+			}
+			else {
+				ok = false;
+			}
+			handled = total_failure.action_handled_response;
+		} catch(e) {
+			console.error(e);
+			ok = false;
+			if (!total_failure.action_handled_response) {
+				handled = true;
+				res.status(500).send({_error: e.toString(), ...res_output});
+			} else {
+				handled = true;
+			}
+		} finally {
+			if (ok && !total_failure.fail_early)
+				await dbsession.commitTransaction();
+			else await dbsession.abortTransaction();
+			if (!ok && !handled) res.status(500).send(res_output);
+			}
+	});
 	});
 app.post("/roll", async (req, res) => {
 	var bodyStr = "";

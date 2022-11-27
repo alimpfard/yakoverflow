@@ -24,16 +24,16 @@ const fs = require("fs").promises;
 let constructLocation = x => FixMeLocation.call(null, x);
 let constructCommitHash = x => String.call(null, x);
 module.exports = async function action_roll_0(res, req, res_output, res_input) {
-	let fake = false
+    let fake = false;
     try {
         await fs.mkdir(serenityRepositoryPath, { recursive: true });
-		fake = true;
-    } catch { }
+        fake = true;
+    } catch {}
 
     const git = simpleGit(serenityRepositoryPath);
     if (
-        !(await git
-            .revparse(["HEAD"])
+        !(await fs
+            .access(serenityRepositoryPath + "/.git", fs.constants.F_OK)
             .then(() => true)
             .catch(() => false))
     ) {

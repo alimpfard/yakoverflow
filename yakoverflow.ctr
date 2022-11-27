@@ -44,6 +44,14 @@ endpoint rollStatistics [
     ]
 ].
 
+action rollsByMe [
+    Request [],
+    Response [
+        RedactedFixMe[] rolls
+    ],
+    Action [ 'Get rolls by me' ]
+].
+
 var resource is Object cnew: {
     resources => Array new.
     on: 'process:' do: {:path

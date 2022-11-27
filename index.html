@@ -77,10 +77,15 @@
                     <button id="roll-statistics-button">Roll Statistics</button>
                 </div>
             </div>
+            <details>
+                <summary>Roll history</summary>
+                <div class="editor-body" id="editor-history"></div>
+            </details>
             <div class="editor-body" id="editor-body"></div>
         </div>
         <script>
             const editorBody = document.getElementById("editor-body");
+            const editorHistory = document.getElementById("editor-history");
             const rollButton = document.getElementById("roll-button");
             const rollStatisticsButton = document.getElementById("roll-statistics-button");
             const roll = () => {
@@ -93,6 +98,10 @@
                 })
                     .then(response => response.json())
                     .then(data => {
+                        for (const node of editorBody.childNodes) {
+                            editorHistory.appendChild(node);
+                        }
+
                         editorBody.innerHTML = "";
                         const line = document.createElement("div");
                         line.className = "editor-body-line";
@@ -109,7 +118,25 @@
                         line.appendChild(lineNumber);
                         line.appendChild(lineText);
                         editorBody.appendChild(line);
+                        editorHistory.style.display = "";
                     });
+            };
+            const makeLine = (item, byMe = false) => {
+                const line = document.createElement("div");
+                line.className = "editor-body-line";
+                const lineText = document.createElement("div");
+                lineText.className = "editor-body-line-text";
+                const lineTextLink = document.createElement("a");
+                lineTextLink.href = `${githubRepoURL}/blob/${item.location.lastChangeHash}/${item.location.path}#L${item.location.lineNumber}`;
+                lineTextLink.target = "_blank";
+                lineTextLink.innerText = `${item.location.path}:${item.location.lineNumber} - ${
+                    item.timesHit
+                } hits, visited by ${item.visitedByCount} unique user${
+                    item.visitedByCount === 1 ? "" : "s"
+                }${byMe ? " (visited by you)" : ""}`;
+                lineText.appendChild(lineTextLink);
+                line.appendChild(lineText);
+                return line;
             };
             const rollStatistics = () => {
                 fetch("/rollStatistics", {
@@ -123,22 +150,30 @@
                     .then(data => {
                         editorBody.innerHTML = "";
                         data.forEach(item => {
-                            const line = document.createElement("div");
-                            line.className = "editor-body-line";
-                            const lineText = document.createElement("div");
-                            lineText.className = "editor-body-line-text";
-                            const lineTextLink = document.createElement("a");
-                            lineTextLink.href = `${githubRepoURL}/blob/${item.location.lastChangeHash}/${item.location.path}#L${item.location.lineNumber}`;
-                            lineTextLink.target = "_blank";
-                            lineTextLink.innerText = `${item.location.path}:${item.location.lineNumber} - ${item.timesHit} hits, visited by ${item.visitedByCount} unique user${item.visitedByCount === 1 ? "" : "s"}`;
-                            lineText.appendChild(lineTextLink);
-                            line.appendChild(lineText);
+                            const line = makeLine(item);
                             editorBody.appendChild(line);
                         });
+                        editorHistory.style.display = "none";
                     });
             };
             rollButton.addEventListener("click", roll);
             rollStatisticsButton.addEventListener("click", rollStatistics);
+            document.addEventListener("DOMContentLoaded", () => {
+                fetch("/rollsByMe", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: "{}",
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        editorHistory.innerHTML = "";
+                        data.rolls.forEach(item => {
+                            const line = makeLine(item, true);
+                            editorHistory.appendChild(line);
+                        });
+                        editorHistory.style.display = "";
+                    });
+            });
         </script>
     </body>
 </html>

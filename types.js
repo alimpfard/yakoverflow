@@ -1,8 +1,8 @@
 module.exports = {};
 let FixMeLocation = {
-	'column': arg => Number.call(null, arg),
 	'path': arg => String.call(null, arg),
 	'lineNumber': arg => Number.call(null, arg),
+	'column': arg => Number.call(null, arg),
 	'lastChangeHash': arg => String.call(null, arg),
 	aliasedName: {},
 	staticProperties: ["call", "staticProperties", "forEach", "aliasedName"],
@@ -26,9 +26,9 @@ let FixMeLocation = {
 module.exports["FixMeLocation"] = FixMeLocation
 
 let RedactedFixMe = {
+	'timesHit': arg => Number.call(null, arg),
 	'visitedByCount': arg => Number.call(null, arg),
 	'location': arg => FixMeLocation.call(null, arg),
-	'timesHit': arg => Number.call(null, arg),
 	aliasedName: {},
 	staticProperties: ["call", "staticProperties", "forEach", "aliasedName"],
 	call(_, value) {
