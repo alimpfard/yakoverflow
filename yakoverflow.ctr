@@ -1,0 +1,69 @@
+import generate: \*.
+
+api postEndpoints.
+
+var project is 'SerenityOS/serenity'.
+
+type FixMeLocation [
+    string path,
+    int lineNumber,
+    int column,
+    string lastChangeHash
+].
+
+model FixMe [
+    FixMeLocation location,
+    int timesHit,
+    string[] visitedBy
+].
+
+type RedactedFixMe [
+    FixMeLocation location,
+    int timesHit,
+    int visitedByCount
+].
+
+action roll [
+    Request [],
+    Response [
+        FixMeLocation location,
+        string commitHash,
+        string text
+    ],
+    Action [
+        'Update ${{project}}$ checkout',
+        'Pull random fixme',
+        'Update fixme database'
+    ]
+].
+
+endpoint rollStatistics [
+    Request [],
+    Response [
+        RedactedFixMe[] statistics
+    ]
+].
+
+var resource is Object cnew: {
+    resources => Array new.
+    on: 'process:' do: {:path
+        redirect from: path to: '/index?res=$$path'.
+        my resources push: path.
+    }.
+    on: 'enum' do: {
+        ^enum applyAll: my resources.
+    }.
+}.
+
+redirect from: '' to: '/index?res=index.html'.
+resource 'index.html'.
+
+action index pure [
+    Request [
+        resource enum res
+    ],
+    Response string,
+    Action ['Set content type']
+].
+
+api generate.

@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>Roll</title>
+        <style>
+            body {
+                font-family: sans-serif;
+            }
+            .editor {
+                width: 100%;
+                height: 100%;
+                display: flex;
+                flex-direction: column;
+            }
+            .editor .editor-header {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+                padding: 0.5em;
+                background-color: #eee;
+            }
+            .editor .editor-header .editor-header-buttons {
+                display: flex;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            .editor .editor-header .editor-header-buttons button {
+                margin-left: 0.5em;
+            }
+            .editor .editor-body {
+                flex-grow: 1;
+                display: flex;
+                flex-direction: column;
+                justify-content: flex-start;
+                align-items: stretch;
+                padding: 0.5em;
+                background-color: #fff;
+            }
+            .editor .editor-body .editor-body-line {
+                display: flex;
+                flex-direction: row;
+                justify-content: flex-start;
+                align-items: center;
+                padding: 0.5em;
+                background-color: #fff;
+            }
+            .editor .editor-body .editor-body-line .editor-body-line-number {
+                width: 2em;
+                text-align: right;
+                margin-right: 0.5em;
+            }
+            .editor .editor-body .editor-body-line .editor-body-line-text {
+                flex-grow: 1;
+            }
+            .editor .editor-body .editor-body-line .editor-body-line-text a {
+                color: #000;
+                text-decoration: none;
+            }
+            .editor .editor-body .editor-body-line .editor-body-line-text a:hover {
+                color: #000;
+                text-decoration: underline;
+            }
+        </style>
+        <script>
+            const githubRepoURL = "https://github.com/serenityos/serenity";
+        </script>
+    </head>
+    <body>
+        <div class="editor">
+            <div class="editor-header">
+                <div class="editor-header-title">Roll</div>
+                <div class="editor-header-buttons">
+                    <button id="roll-button">Roll</button>
+                    <button id="roll-statistics-button">Roll Statistics</button>
+                </div>
+            </div>
+            <div class="editor-body" id="editor-body"></div>
+        </div>
+        <script>
+            const editorBody = document.getElementById("editor-body");
+            const rollButton = document.getElementById("roll-button");
+            const rollStatisticsButton = document.getElementById("roll-statistics-button");
+            const roll = () => {
+                fetch("/roll", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: "{}",
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        editorBody.innerHTML = "";
+                        const line = document.createElement("div");
+                        line.className = "editor-body-line";
+                        const lineNumber = document.createElement("div");
+                        lineNumber.className = "editor-body-line-number";
+                        lineNumber.innerText = data.location.lineNumber;
+                        const lineText = document.createElement("div");
+                        lineText.className = "editor-body-line-text";
+                        const lineTextLink = document.createElement("a");
+                        lineTextLink.href = `${githubRepoURL}/blob/${data.commitHash}/${data.location.path}#L${data.location.lineNumber}`;
+                        lineTextLink.target = "_blank";
+                        lineTextLink.innerText = data.text;
+                        lineText.appendChild(lineTextLink);
+                        line.appendChild(lineNumber);
+                        line.appendChild(lineText);
+                        editorBody.appendChild(line);
+                    });
+            };
+            const rollStatistics = () => {
+                fetch("/rollStatistics", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                    },
+                    body: "{}",
+                })
+                    .then(response => response.json())
+                    .then(data => {
+                        editorBody.innerHTML = "";
+                        data.forEach(item => {
+                            const line = document.createElement("div");
+                            line.className = "editor-body-line";
+                            const lineText = document.createElement("div");
+                            lineText.className = "editor-body-line-text";
+                            const lineTextLink = document.createElement("a");
+                            lineTextLink.href = `${githubRepoURL}/blob/${item.location.lastChangeHash}/${item.location.path}#L${item.location.lineNumber}`;
+                            lineTextLink.target = "_blank";
+                            lineTextLink.innerText = `${item.location.path}:${item.location.lineNumber} - ${item.timesHit} hits, visited by ${item.visitedByCount} unique user${item.visitedByCount === 1 ? "" : "s"}`;
+                            lineText.appendChild(lineTextLink);
+                            line.appendChild(lineText);
+                            editorBody.appendChild(line);
+                        });
+                    });
+            };
+            rollButton.addEventListener("click", roll);
+            rollStatisticsButton.addEventListener("click", rollStatistics);
+        </script>
+    </body>
+</html>
